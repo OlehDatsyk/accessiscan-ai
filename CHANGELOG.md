@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] – 2026-11-18
+
+### Fixed
+- Adding a website from the dashboard's "Add website" link (`/websites?add=1`) now opens the new website; the query parameter could previously override that navigation. Found by the live production smoke test; covered by E2E.
+- The score ring no longer collapses inside narrow flex layouts.
+
+### Added
+- Controlled demo pages `/demo/violations.html` and `/demo/accessible.html` on the frontend site for verifying deployments.
+- Render build filters so each service only redeploys when its own folder changes.
+- Live demo on Render: https://accessiscan-ai-frontend.onrender.com
+
 ## [1.0.1] – 2026-11-18
 
 ### Added

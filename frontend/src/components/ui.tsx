@@ -482,7 +482,7 @@ export function ScoreRing({ score, size = 96 }: { score: number | null | undefin
   const c = 2 * Math.PI * r;
   const color = score === null || score === undefined ? "#64748b" : s >= 90 ? "#047857" : s >= 70 ? "#b45309" : "#b91c1c";
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={score === null || score === undefined ? "Not scored" : `Score ${s} out of 100`}>
+    <svg width={size} height={size} viewBox="0 0 100 100" className="shrink-0" role="img" aria-label={score === null || score === undefined ? "Not scored" : `Score ${s} out of 100`}>
       <circle cx="50" cy="50" r={r} fill="none" stroke="#e2e8f0" strokeWidth="10" />
       <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(s / 100) * c} ${c}`} transform="rotate(-90 50 50)" />
       <text x="50" y="56" textAnchor="middle" fontSize="22" fontWeight="700" fill="#0b1a33">

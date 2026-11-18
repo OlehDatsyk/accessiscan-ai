@@ -6,6 +6,18 @@ AccessiScan AI loads your pages in a real Chromium browser, runs the [axe-core](
 
 > **Automated testing cannot prove accessibility.** Tools like axe-core detect only part of WCAG 2.2. AccessiScan AI reports are automated assessments — not legal certification and not proof of conformance with WCAG, the ADA, the European Accessibility Act or EN 301 549. Every scan includes a manual-review checklist for the criteria a machine cannot judge.
 
+## Live demo
+
+| | URL |
+|---|---|
+| Web app | **https://accessiscan-ai-frontend.onrender.com** |
+| API | https://accessiscan-ai-api.onrender.com |
+| API docs | https://accessiscan-ai-api.onrender.com/api/docs |
+| Health | https://accessiscan-ai-api.onrender.com/health/ready |
+| Controlled test pages | https://accessiscan-ai-frontend.onrender.com/demo/violations.html · https://accessiscan-ai-frontend.onrender.com/demo/accessible.html |
+
+The demo runs on Render's free plan in **demo mode**: data is temporary and is deleted whenever the service restarts, redeploys or sleeps (after ~15 minutes without traffic; the first request afterwards takes about a minute). AI features are not configured on the demo. Register any account, add the controlled test page above as a website and run a scan.
+
 ![Scan results](docs/screenshots/scan-results.png)
 
 ---

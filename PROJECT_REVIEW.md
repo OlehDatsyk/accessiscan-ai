@@ -111,9 +111,30 @@ Ready: `.gitignore` excludes `.env`, databases, virtualenvs, `node_modules`, bui
 
 Ready for Blueprint deployment: Docker-based API (Chromium dependencies included, binds `0.0.0.0:$PORT`, migrations on start, `/health/ready` health check, proxy headers trusted), static frontend with SPA rewrite and CSP, PostgreSQL via `fromDatabase`, generated `SECRET_KEY`, restricted CORS, embedded worker because background workers have no free tier. Plan limits are documented in `render.yaml` and INSTRUCTION.md. Deployment status is recorded in the section below.
 
-## 11. Deployment status
+## 11. Deployment status – deployed and verified (18 November 2026)
 
-See the *Deployment* section of README.md for the live URLs once deployed. Until a live scan has been verified, the deployment must be treated as not verified.
+**Successful deployment** on Render (Blueprint `accessiscan-ai`, region Frankfurt, free plan), in demo mode because the workspace's single free PostgreSQL slot is already used by another project:
+
+| Item | Result |
+|---|---|
+| Frontend | https://accessiscan-ai-frontend.onrender.com – live (static site, CSP header present) |
+| Backend | https://accessiscan-ai-api.onrender.com – live (Docker, Playwright 1.65 / Chromium) |
+| API docs | https://accessiscan-ai-api.onrender.com/api/docs – 200 |
+| Database | SQLite on the instance disk (`EPHEMERAL_DEMO=true`) – **temporary**; no PostgreSQL service |
+| Scanner worker | Embedded in the API process – started (`worker started (concurrency=1)`) |
+| Playwright browser | Launches in the deployed container (scanner version reported by the scan below) |
+| AI provider | Not configured (no keys) – `/api/v1/ai/status` returns the configuration message; AI buttons disabled |
+| Health check | `/health/ready` → `{"status":"ok","database":"ok","version":"1.0.1","embedded_worker":true}` |
+| CORS | Allowed for the frontend origin; no header for `https://evil.example` |
+| Auth | Registration 201, login 200, unauthenticated `/websites` 401 |
+| SSRF on production | `169.254.169.254`, `localhost:10000`, `127.1`, `[::1]`, `file:///etc/passwd`, `10.0.0.1` all refused with clear messages |
+| **Real scan** | Controlled page `/demo/violations.html` scanned in **17 s**: completed, score 23.6, 5 critical / 4 serious / 11 moderate, 16 passed checks, 1 needs review, 21 issues across 12 rules with engine-derived WCAG mappings (1.1.1, 1.4.3, 2.4.4, 2.5.8, 3.1.1, 4.1.2; best practice for region/landmark/heading rules). Scanner: AccessiScan 1.0.1; axe-core 4.14.0; Playwright 1.65.0; Chromium |
+| **Reports** | PDF (15 KB, `%PDF`), CSV (15 KB, UTF-8 BOM) and DOCX (41 KB, `PK`) generated and downloaded by the owner |
+| Live UI smoke test | Headless Chromium against the live site: demo banner shown, registration, add website, scan, results and dashboard; axe-core zero violations on login, scan results and dashboard; no console errors |
+
+The live smoke test found one bug (navigation after adding a website from the dashboard link), which was fixed (v1.0.2), redeployed and re-verified.
+
+**Requires user action for persistent data:** add PostgreSQL (paid Render plan, or an external free PostgreSQL) as described in `render.yaml`, then remove `EPHEMERAL_DEMO`. **Optional:** set `AI_PROVIDER` and a key in the API service's environment to enable AI (paid provider usage).
 
 ## Not verified
 - macOS launcher on real macOS hardware.
