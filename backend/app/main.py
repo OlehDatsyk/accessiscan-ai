@@ -137,6 +137,16 @@ def create_app() -> FastAPI:
         }
         return JSONResponse(body, status_code=200 if db_ok else 503)
 
+    @app.get("/api/v1/meta", tags=["meta"])
+    def meta() -> dict[str, Any]:
+        """Public, non-sensitive deployment information used by the frontend."""
+        return {
+            "version": __version__,
+            "ephemeral_demo": settings.ephemeral_demo,
+            "registration_enabled": settings.registration_enabled,
+            "docs_enabled": docs,
+        }
+
     @app.get("/", include_in_schema=False)
     def root() -> dict[str, str]:
         return {"name": "AccessiScan AI API", "docs": "/api/docs" if docs else "disabled", "health": "/health/ready"}

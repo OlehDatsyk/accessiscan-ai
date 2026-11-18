@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] – 2026-11-18
+
+### Added
+- `EPHEMERAL_DEMO` mode for deployments without a persistent database: SQLite is allowed in production only in this mode, `/api/v1/meta` exposes it and the UI shows a permanent "data is temporary" banner.
+- Render Blueprint switched to the free demo mode (the workspace's free PostgreSQL slot is in use); PostgreSQL instructions kept in `render.yaml`.
+
 ## [1.0.0] – 2026-11-18
 
 ### Added

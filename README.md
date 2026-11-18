@@ -199,6 +199,7 @@ See [`.env.example`](.env.example) for every variable with defaults. The most im
 | `FRONTEND_URL` | no | no | Public frontend URL |
 | `TRUSTED_PROXY_HEADERS` | no | no | Use `X-Forwarded-For` for client IPs (only behind a trusted proxy) |
 | `RUN_EMBEDDED_WORKER` | no | no | Run the scan worker inside the API process (default `true`) |
+| `EPHEMERAL_DEMO` | no | no | Demo without a persistent database: allows SQLite in production and shows a "data is temporary" banner |
 | `AI_PROVIDER` / `AI_MODEL` | no | no | `none` (default), `openai`, `anthropic`, `gemini`; optional model override |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` | no | **yes** | Key for the selected provider |
 | `SCAN_*` | no | no | Scanner limits (pages, depth, timeouts, sizes, rate limits, ports) |
@@ -242,8 +243,9 @@ The repository contains a Render Blueprint ([`render.yaml`](render.yaml)):
 |---|---|---|
 | `accessiscan-ai-api` | Web service, **Docker** | FastAPI + embedded scan worker; image based on `mcr.microsoft.com/playwright/python:v1.65.0-noble` (Chromium + OS libraries included) |
 | `accessiscan-ai-frontend` | Static site | React build, SPA rewrite, CSP headers |
-| `accessiscan-ai-db` | PostgreSQL | Connection string injected into the API |
-| `accessiscan-ai-worker` | Background worker (commented) | For paid plans; set `RUN_EMBEDDED_WORKER=false` on the API |
+| `accessiscan-ai-worker` | Background worker (commented) | For paid plans with PostgreSQL; set `RUN_EMBEDDED_WORKER=false` on the API |
+
+The published Blueprint runs in **demo mode** (`EPHEMERAL_DEMO=true`): the API stores data in SQLite on the free instance's disk, which Render wipes on restart, redeploy and idle sleep, and the UI shows a permanent "data is temporary" banner. For persistent data, add a PostgreSQL database (instructions at the top of `render.yaml`) and remove `EPHEMERAL_DEMO`.
 
 The Docker runtime is required — Render's native Python runtime does not include Chromium's system libraries. Migrations run on container start (`alembic upgrade head`, additive only). Health check: `/health/ready`. See [INSTRUCTION.md](INSTRUCTION.md#deploying-to-render) for step-by-step deployment and plan sizing.
 

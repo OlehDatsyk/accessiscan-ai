@@ -3,27 +3,33 @@
 # Architecture (simplest reliable setup that runs on Render's free tier):
 #   accessiscan-ai-api       Docker web service (FastAPI + EMBEDDED scan worker with Playwright/Chromium)
 #   accessiscan-ai-frontend  Static site (React build)
-#   accessiscan-ai-db        Render PostgreSQL
+#
+# DEMO MODE (current): no database server. EPHEMERAL_DEMO=true lets the API keep its data in a SQLite file on
+# the free instance's disk, which Render WIPES on every restart, redeploy and idle spin-down (~15 min). The app
+# shows a permanent "data is temporary" banner. (This workspace's single free PostgreSQL slot is already in use.)
+#
+# For persistent data use PostgreSQL and remove EPHEMERAL_DEMO:
+#   - Render-managed: add
+#       databases:
+#         - name: accessiscan-ai-db
+#           databaseName: accessiscan
+#           plan: basic-256mb      # or free, if the workspace's free PostgreSQL slot is unused
+#           region: frankfurt
+#     and replace the DATABASE_URL entry with
+#       fromDatabase: { name: accessiscan-ai-db, property: connectionString }
+#   - external (e.g. Neon): set DATABASE_URL to `sync: false` and paste the URL in the dashboard.
 #
 # Why Docker: the native Python runtime does not include Chromium's OS libraries. The image is based on
 # mcr.microsoft.com/playwright/python, which contains the matching browser and dependencies.
 #
 # Why an embedded worker: Render background workers are not available on the free plan. The API process
-# starts the DB-backed job queue worker in a separate thread (RUN_EMBEDDED_WORKER=true); scans never run
-# inside an HTTP request. On a paid plan, uncomment the dedicated worker below and set
-# RUN_EMBEDDED_WORKER=false on the API.
+# starts the DB-backed job-queue worker in a separate thread (RUN_EMBEDDED_WORKER=true); scans never run
+# inside an HTTP request. On a paid plan with PostgreSQL, uncomment the dedicated worker below and set
+# RUN_EMBEDDED_WORKER=false on the API (a separate worker cannot share an ephemeral SQLite file).
 #
 # Plan notes: the free web service has 512 MB RAM and 0.1 CPU and sleeps after ~15 minutes of inactivity.
-# Single-page scans work but are slow; crawls of heavy sites can exhaust memory. "starter" (512 MB, more CPU,
-# no sleep) or "standard" (2 GB) is recommended for regular use. Free PostgreSQL databases expire after
-# 30 days on Render - upgrade or point DATABASE_URL at another PostgreSQL to keep data.
-
-databases:
-  - name: accessiscan-ai-db
-    databaseName: accessiscan
-    user: accessiscan
-    plan: free
-    region: frankfurt
+# Single-page scans work but are slow; crawls of heavy sites can exhaust memory. "starter" or "standard"
+# is recommended for regular use.
 
 services:
   - type: web
@@ -31,18 +37,17 @@ services:
     runtime: docker
     region: frankfurt
     plan: free
-    rootDir: backend
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     healthCheckPath: /health/ready
     autoDeploy: true
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: accessiscan-ai-db
-          property: connectionString
+        value: sqlite:///./accessiscan-demo.db # temporary demo data - see the header comment
+      - key: EPHEMERAL_DEMO
+        value: "true"
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS

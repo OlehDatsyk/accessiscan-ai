@@ -78,10 +78,10 @@ cd frontend && npx playwright test                         # E2E + axe-core acce
 
 ## 5. Deploying to Render
 
-AccessiScan AI ships a Blueprint (`render.yaml`) with three resources: **`accessiscan-ai-api`** (Docker web service with the embedded scan worker), **`accessiscan-ai-frontend`** (static site) and **`accessiscan-ai-db`** (PostgreSQL).
+AccessiScan AI ships a Blueprint (`render.yaml`) with two services: **`accessiscan-ai-api`** (Docker web service with the embedded scan worker) and **`accessiscan-ai-frontend`** (static site). It runs in **demo mode** (`EPHEMERAL_DEMO=true`, SQLite on the instance disk – wiped on restart, redeploy and idle sleep, with a banner in the UI). For persistent data add **`accessiscan-ai-db`** (PostgreSQL) as described at the top of `render.yaml` and remove `EPHEMERAL_DEMO`.
 
 1. Push the repository to GitHub.
-2. In the Render Dashboard choose **New → Blueprint**, select the repository and confirm. Render creates the database first, then the API (Docker build from `backend/Dockerfile`) and the static frontend.
+2. In the Render Dashboard choose **New → Blueprint**, select the repository and confirm. Render creates the API (Docker build from `backend/Dockerfile`) and the static frontend (plus the database, if you added one).
 3. Wait for the API's first deploy (the Playwright base image is large; the first build takes several minutes). Migrations run automatically on start.
 4. Check `https://accessiscan-ai-api.onrender.com/health/ready` → `{"status":"ok","database":"ok",…}`.
 5. Open `https://accessiscan-ai-frontend.onrender.com`, register and run a scan of a site you control.

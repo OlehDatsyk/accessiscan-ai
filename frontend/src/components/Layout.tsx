@@ -20,6 +20,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-do
 import { api, post } from "../api/client";
 import type { Notification } from "../api/types";
 import { useAuth } from "../lib/auth";
+import { DemoBanner } from "./DemoBanner";
 import { relativeTime } from "../lib/format";
 
 const NAV = [
@@ -234,7 +235,9 @@ export default function Layout() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+          <DemoBanner />
+          <div className="flex items-center gap-3 px-4 py-2 sm:px-6">
           <button
             type="button"
             className="rounded-md p-2 text-navy-900 hover:bg-slate-100 lg:hidden"
@@ -255,6 +258,7 @@ export default function Layout() {
             <LogOut className="h-4 w-4" aria-hidden="true" />
             Sign out
           </button>
+          </div>
         </header>
         <main id="main-content" ref={mainRef} tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-8">
           <Suspense fallback={<div role="status" className="py-8 text-slate-700">Loading page…</div>}>

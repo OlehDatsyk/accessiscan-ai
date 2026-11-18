@@ -191,6 +191,9 @@ def test_production_settings_guards() -> None:
         Settings(environment="production", secret_key="short")
     with pytest.raises(ValidationError):
         Settings(environment="production", secret_key="x" * 40, scanner_allow_hosts="127.0.0.1:80")
+    with pytest.raises(ValidationError):
+        Settings(environment="production", secret_key="x" * 40, database_url="sqlite:///./x.db")
+    assert Settings(environment="production", secret_key="x" * 40, database_url="sqlite:///./x.db", ephemeral_demo=True)
     s = Settings(environment="production", secret_key="x" * 40, database_url="postgres://u:p@h/db")
     assert s.database_url.startswith("postgresql+psycopg://")
 

@@ -49,6 +49,7 @@ export default defineConfig({
         AI_PROVIDER: "none",
         CORS_ORIGINS: "http://127.0.0.1:4173",
         SCAN_USER_HOURLY_LIMIT: "100",
+        EPHEMERAL_DEMO: "true", // exercises the demo banner in the accessibility checks
       },
     },
     {

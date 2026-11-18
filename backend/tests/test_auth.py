@@ -195,3 +195,8 @@ def test_cors_only_configured_origins(client: TestClient) -> None:
 def test_oversized_body_rejected(client: TestClient) -> None:
     r = client.post("/api/v1/auth/login", content=b"x" * 1_100_000, headers={"Content-Type": "application/json"})
     assert r.status_code == 413
+
+
+def test_public_meta(client: TestClient) -> None:
+    r = client.get("/api/v1/meta").json()
+    assert r["ephemeral_demo"] is False and r["registration_enabled"] is True and "version" in r

@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     trusted_proxy_headers: bool = False
     docs_enabled: bool = True
     registration_enabled: bool = True
+    # Demo deployments without a persistent database (e.g. SQLite on an ephemeral disk). Shows a
+    # permanent "data is temporary" banner in the UI and is the only way SQLite is allowed in production.
+    ephemeral_demo: bool = False
 
     access_token_minutes: int = Field(default=30, ge=5, le=24 * 60)
     refresh_token_days: int = Field(default=7, ge=1, le=60)
@@ -85,6 +88,8 @@ class Settings(BaseSettings):
                 raise ValueError("SCANNER_ALLOW_HOSTS is a development/test setting and is refused in production")
             if "*" in self.cors_origin_list:
                 raise ValueError("Wildcard CORS origins are not allowed in production")
+            if self.is_sqlite and not self.ephemeral_demo:
+                raise ValueError("SQLite is only allowed in production with EPHEMERAL_DEMO=true; use PostgreSQL")
         return self
 
     @property

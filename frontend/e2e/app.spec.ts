@@ -3,6 +3,7 @@ import { expectNoA11yViolations, FIXTURE, registerUser } from "./helpers";
 
 test("login and registration pages are accessible and validate input", async ({ page }) => {
   await page.goto("/login");
+  await expect(page.getByText("Demo deployment:")).toBeVisible();
   await expectNoA11yViolations(page, "login");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText("Enter your e-mail address")).toBeVisible();

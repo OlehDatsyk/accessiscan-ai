@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { usePageTitle } from "../components/Layout";
 import { Alert, Button, TextField } from "../components/ui";
+import { DemoBanner } from "../components/DemoBanner";
 import { useAuth } from "../lib/auth";
 
 function AuthShell({ title, children }: { title: string; children: ReactNode }) {
@@ -32,7 +33,8 @@ function AuthShell({ title, children }: { title: string; children: ReactNode }) 
         </div>
         <p className="text-xs text-slate-300">Automated testing finds only part of WCAG issues. Results are not legal certification.</p>
       </aside>
-      <main className="flex flex-1 items-center justify-center px-4 py-10">
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-10">
+        <div className="mb-6 w-full max-w-sm overflow-hidden rounded-lg empty:hidden"><DemoBanner /></div>
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-semibold text-navy-900">{title}</h1>
           {children}
