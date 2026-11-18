@@ -78,12 +78,15 @@ export default function Websites() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["websites"] }),
   });
 
+  // "?add=1" (from the dashboard) opens the dialog once; remove it from the URL straight away so that it
+  // cannot later replace the navigation to the newly created website.
   useEffect(() => {
-    if (params.get("add") === "1" && !open) {
-      params.delete("add");
-      setParams(params, { replace: true });
+    if (params.get("add") === "1") {
+      const next = new URLSearchParams(params);
+      next.delete("add");
+      setParams(next, { replace: true });
     }
-  }, [open, params, setParams]);
+  }, [params, setParams]);
 
   return (
     <>

@@ -23,9 +23,8 @@ test("full audit workflow with a real scan, keyboard access and axe checks on ev
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
 
-  // Add a website (the local fixture site with known violations).
-  await page.goto("/websites");
-  await page.getByRole("button", { name: "Add website" }).first().click();
+  // Add a website (the local fixture site with known violations) via the dashboard's "Add website" link.
+  await page.getByRole("main").getByRole("link", { name: "Add website" }).first().click();
   const dialog = page.getByRole("dialog", { name: "Add website" });
   await expect(dialog).toBeVisible();
   await expectNoA11yViolations(page, "add website dialog");
