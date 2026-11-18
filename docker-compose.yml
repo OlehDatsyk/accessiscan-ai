@@ -1,0 +1,75 @@
+# Local stack: PostgreSQL + API + dedicated scanner worker + frontend (nginx).
+#   docker compose up -d db            # only the database (used by "Start App.bat" for local development)
+#   docker compose up --build          # everything -> http://localhost:8080
+# Credentials below are for LOCAL DEVELOPMENT ONLY. Never reuse them in production.
+name: accessiscan-ai
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: accessiscan
+      POSTGRES_PASSWORD: accessiscan_local_dev
+      POSTGRES_DB: accessiscan
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - accessiscan-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accessiscan -d accessiscan"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./backend
+    command: ["api"]
+    environment: &backend-env
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+psycopg://accessiscan:accessiscan_local_dev@db:5432/accessiscan
+      SECRET_KEY: ${SECRET_KEY:-local-compose-secret-change-me-0123456789abcdef}
+      CORS_ORIGINS: http://localhost:8080
+      FRONTEND_URL: http://localhost:8080
+      TRUSTED_PROXY_HEADERS: "true"
+      RUN_EMBEDDED_WORKER: "false"
+      AI_PROVIDER: ${AI_PROVIDER:-none}
+      AI_MODEL: ${AI_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # Development only: allow scanning a local test site, e.g. SCANNER_ALLOW_HOSTS=fixture:8000
+      SCANNER_ALLOW_HOSTS: ${SCANNER_ALLOW_HOSTS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  worker:
+    build: ./backend
+    command: ["worker"]
+    environment:
+      <<: *backend-env
+    healthcheck:
+      # The worker has no HTTP port; check that its main process is alive.
+      test: ["CMD", "python3", "-c", "import os; os.kill(1, 0)"]
+      interval: 30s
+    depends_on:
+      api:
+        condition: service_healthy
+    # Browser scans: give Chromium enough shared memory and cap resources.
+    shm_size: "512m"
+    mem_limit: 1536m
+    cpus: 1.5
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  accessiscan-pgdata:

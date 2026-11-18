@@ -1,0 +1,133 @@
+# Render Blueprint for AccessiScan AI.
+#
+# Architecture (simplest reliable setup that runs on Render's free tier):
+#   accessiscan-ai-api       Docker web service (FastAPI + EMBEDDED scan worker with Playwright/Chromium)
+#   accessiscan-ai-frontend  Static site (React build)
+#   accessiscan-ai-db        Render PostgreSQL
+#
+# Why Docker: the native Python runtime does not include Chromium's OS libraries. The image is based on
+# mcr.microsoft.com/playwright/python, which contains the matching browser and dependencies.
+#
+# Why an embedded worker: Render background workers are not available on the free plan. The API process
+# starts the DB-backed job queue worker in a separate thread (RUN_EMBEDDED_WORKER=true); scans never run
+# inside an HTTP request. On a paid plan, uncomment the dedicated worker below and set
+# RUN_EMBEDDED_WORKER=false on the API.
+#
+# Plan notes: the free web service has 512 MB RAM and 0.1 CPU and sleeps after ~15 minutes of inactivity.
+# Single-page scans work but are slow; crawls of heavy sites can exhaust memory. "starter" (512 MB, more CPU,
+# no sleep) or "standard" (2 GB) is recommended for regular use. Free PostgreSQL databases expire after
+# 30 days on Render - upgrade or point DATABASE_URL at another PostgreSQL to keep data.
+
+databases:
+  - name: accessiscan-ai-db
+    databaseName: accessiscan
+    user: accessiscan
+    plan: free
+    region: frankfurt
+
+services:
+  - type: web
+    name: accessiscan-ai-api
+    runtime: docker
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/ready
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: accessiscan-ai-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://accessiscan-ai-frontend.onrender.com
+      - key: FRONTEND_URL
+        value: https://accessiscan-ai-frontend.onrender.com
+      - key: TRUSTED_PROXY_HEADERS
+        value: "true"
+      - key: DOCS_ENABLED
+        value: "true"
+      - key: REGISTRATION_ENABLED
+        value: "true"
+      - key: RUN_EMBEDDED_WORKER
+        value: "true"
+      - key: SCAN_MAX_CONCURRENCY
+        value: "1"
+      - key: SCAN_MAX_PAGES
+        value: "5"
+      - key: SCAN_TIMEOUT_SECONDS
+        value: "240"
+      - key: SCAN_PAGE_TIMEOUT_SECONDS
+        value: "45"
+      - key: SCAN_USER_MAX_ACTIVE
+        value: "1"
+      - key: SCAN_USER_HOURLY_LIMIT
+        value: "6"
+      - key: DB_POOL_SIZE
+        value: "3"
+      - key: DB_MAX_OVERFLOW
+        value: "2"
+      - key: AI_PROVIDER
+        value: none # set to openai, anthropic or gemini AND add the matching key to enable AI
+      - key: AI_MODEL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: accessiscan-ai-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci --no-audit --no-fund && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+    envVars:
+      - key: VITE_API_URL
+        value: https://accessiscan-ai-api.onrender.com
+      - key: NODE_VERSION
+        value: "22"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://accessiscan-ai-api.onrender.com; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+
+  # Dedicated scanner worker (paid plans only - Render background workers have no free tier).
+  # - type: worker
+  #   name: accessiscan-ai-worker
+  #   runtime: docker
+  #   region: frankfurt
+  #   plan: starter
+  #   rootDir: backend
+  #   dockerfilePath: ./Dockerfile
+  #   dockerContext: .
+  #   dockerCommand: ./docker-entrypoint.sh worker
+  #   envVars:
+  #     - key: ENVIRONMENT
+  #       value: production
+  #     - key: DATABASE_URL
+  #       fromDatabase: { name: accessiscan-ai-db, property: connectionString }
+  #     - key: SECRET_KEY
+  #       fromService: { type: web, name: accessiscan-ai-api, envVarKey: SECRET_KEY }

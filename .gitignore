@@ -1,0 +1,49 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Databases, scan data and generated reports
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite3
+reports/
+scan-data/
+tmp/
+
+# Node / frontend
+node_modules/
+dist/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+*.tsbuildinfo
+
+# Browsers (installed by `playwright install`, never committed)
+ms-playwright/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+.claude/
