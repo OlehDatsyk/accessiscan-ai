@@ -247,6 +247,8 @@ The repository contains a Render Blueprint ([`render.yaml`](render.yaml)):
 
 The published Blueprint runs in **demo mode** (`EPHEMERAL_DEMO=true`): the API stores data in SQLite on the free instance's disk, which Render wipes on restart, redeploy and idle sleep, and the UI shows a permanent "data is temporary" banner. For persistent data, add a PostgreSQL database (instructions at the top of `render.yaml`) and remove `EPHEMERAL_DEMO`.
 
+The frontend also publishes two controlled test pages – `/demo/violations.html` (known defects) and `/demo/accessible.html` (known-good) – so a deployment can be verified without scanning third-party sites.
+
 The Docker runtime is required — Render's native Python runtime does not include Chromium's system libraries. Migrations run on container start (`alembic upgrade head`, additive only). Health check: `/health/ready`. See [INSTRUCTION.md](INSTRUCTION.md#deploying-to-render) for step-by-step deployment and plan sizing.
 
 ## API documentation

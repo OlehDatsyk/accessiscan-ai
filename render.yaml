@@ -41,6 +41,9 @@ services:
     dockerContext: ./backend
     healthCheckPath: /health/ready
     autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
     envVars:
       - key: ENVIRONMENT
         value: production
@@ -96,6 +99,9 @@ services:
     buildCommand: npm ci --no-audit --no-fund && npm run build
     staticPublishPath: dist
     pullRequestPreviewsEnabled: false
+    buildFilter:
+      paths:
+        - frontend/**
     envVars:
       - key: VITE_API_URL
         value: https://accessiscan-ai-api.onrender.com
