@@ -37,6 +37,7 @@ test("capture screenshots", async ({ page }) => {
   await addSite("Demo storefront", `${FIXTURE}/violations.html`);
   await scan();
   await page.getByRole("link", { name: /Images must have alternative text/ }).first().click();
+  await expect(page.getByRole("heading", { level: 1, name: /Images must have alternative text/ })).toBeVisible();
   await page.getByRole("combobox", { name: "Status" }).selectOption("marked_fixed");
   await page.getByRole("button", { name: "Update status" }).click();
   await page.goto("/websites");

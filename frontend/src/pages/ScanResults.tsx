@@ -94,12 +94,12 @@ export default function ScanResults() {
         <section aria-labelledby="overview-h" className="mb-6">
           <h2 id="overview-h" className="sr-only">Overview</h2>
           <div className="grid gap-4 lg:grid-cols-4">
-            <Card className="flex items-center gap-4 lg:col-span-1">
+            <Card className="flex min-w-0 flex-col items-center gap-3 text-center sm:flex-row sm:text-left lg:col-span-1 lg:flex-col lg:text-center">
               <ScoreRing score={s.score} />
               <div>
                 <p className={`font-semibold ${band.className}`}>{band.label}</p>
-                <button type="button" onClick={() => setMethodOpen(true)} className="mt-1 flex items-center gap-1 text-sm font-medium text-navy-800 underline">
-                  <Info className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="whitespace-nowrap">How is this calculated?</span>
+                <button type="button" onClick={() => setMethodOpen(true)} className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-navy-800 underline">
+                  <Info className="h-4 w-4 shrink-0" aria-hidden="true" /><span>How is this calculated?</span>
                 </button>
               </div>
             </Card>
